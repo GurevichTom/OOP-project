@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import assignments.UserNameFeatures;
-import factories.EntitiesFactory;
-import factories.GeneratedActions;
+import factories.BuyerFactory;
+import factories.SellerFactory;
 
 public class Main {
     /**
@@ -552,38 +552,20 @@ public class Main {
      * create a test system for functionality for course 10119
      */
     private static void createTestSystem() {
-        //create Sellers' list
-        createTestList("Sellers");
-        GeneratedActions.addSampleItemsToSellers(manager);
-        //Step 2: create Buyers' list
-        createTestList("Buyers");
-        GeneratedActions.addSampleItemsToBuyer(manager);
-        GeneratedActions.payForOrder(manager);
-
+        ArrayList<Buyer> newBuyers = BuyerFactory.createListBuyer();
+        manager.getBuyers().addAll(newBuyers);
+        messageDoneToGenerate(newBuyers, "Buyers");
+        ArrayList<Seller> newSellers = SellerFactory.createListSeller();
+        manager.getSellers().addAll(newSellers);
+        messageDoneToGenerate(newSellers, "Sellers");
     }
-    /**
-     * create the test list for Sellers' list
-     * @param pluralEntityType is the field for Sellers/Buyers
-     */
-    private static void createTestList(String pluralEntityType){
-        ArrayList<? extends User> newUsers = EntitiesFactory.createEntitiesList(pluralEntityType);
 
-        if (newUsers.getFirst() instanceof Seller){
-            newUsers.forEach(user -> manager.getSellers().add((Seller)user));
-            messageDoneToGenerate(newUsers, "Sellers");
-        }
-        else if (newUsers.getFirst() instanceof Buyer){
-            newUsers.forEach(user -> manager.getBuyers().add((Buyer)user));
-            messageDoneToGenerate(newUsers, "Buyers");
-        }
-
-    }
     /**
      * prints the message of successful generation
      */
     private static void messageDoneToGenerate(ArrayList<? extends User> newUsers, String pluralEntityType){
         System.out.println("Automatic generation of " + pluralEntityType + " successful");
-        newUsers.forEach(user -> System.out.println("Added seller: " + user.getUsername()));
+        newUsers.forEach(user -> System.out.println("Added user: " + user.getUsername()));
     }
 
 }
