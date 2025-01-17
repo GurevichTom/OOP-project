@@ -88,6 +88,10 @@ public class  Product implements Cloneable {
             throw new AssertionError("Cloning not supported", e);
         }
     }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
 }
 
 

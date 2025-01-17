@@ -1,9 +1,14 @@
 package main;
 
+import factories.BuyerFactory;
+import factories.ProductFactory;
+import factories.SellerFactory;
+import features.SystemOutput;
+import features.UserInput;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicReference;
+
+// TODO : Check if there is no such a user.
 
 /**
  * The Manager class is responsible for managing the lists of buyers and sellers,
@@ -18,8 +23,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * of the Manager class exists throughout the application.
  */
 public class Manager {
-    private ArrayList<Buyer> buyers = new ArrayList<>();
-    private ArrayList<Seller> sellers = new ArrayList<>(); // for Section 15.
+    private static ArrayList<Buyer> buyers = new ArrayList<>();
+    private static ArrayList<Seller> sellers = new ArrayList<>(); // for Section 15.
 
 
     /**
@@ -28,7 +33,7 @@ public class Manager {
      * @param buyer the buyer whose cart is to be paid for
      * @return a string containing the cart details and total price, or an error message if the cart is empty
      */
-    public String processPayment(Buyer buyer) {
+    private String processPayment(Buyer buyer) {
         try {
             if (buyer.getCartCount() == 0) {
                 throw new EmptyCartException("The cart is empty. Cannot proceed with payment.");
@@ -86,21 +91,17 @@ public class Manager {
     /**
      * Adds a new buyer to the list.
      *
-     * @param buyer the Buyer object to be added
      * @return true if the buyer was added successfully, false if the username already exists
      */
-    public boolean addBuyer(Buyer buyer) {
-        return addEntity(buyer, buyers);
+    public void addBuyer() {
+        addEntity(BuyerFactory.createBuyer(), buyers);
     }
 
     /**
      * Adds a new seller to the list.
-     *
-     * @param seller the Seller object to be added
-     * @return true if the seller was added successfully, false if the username already exists
      */
-    public boolean addSeller(Seller seller) {
-        return addEntity(seller, sellers);
+    public void addSeller() {
+        addEntity(SellerFactory.createSeller(), sellers);
     }
 
     /**
@@ -210,7 +211,7 @@ public class Manager {
      * @param userArrayList the list to search
      * @return true if the username exists in the array, false otherwise
      */
-    private boolean containsUsernameInArray(String username, ArrayList<? extends User> userArrayList) {
+    private static boolean containsUsernameInArray(String username, ArrayList<? extends User> userArrayList) {
         for (User user : userArrayList) {
             if (user.getUsername().equals(username)) {
                 return true;
@@ -262,23 +263,6 @@ public class Manager {
     }
 
 
-    /**
-     * Handles the category selection and returns whether the selection was valid.
-     *
-     * @param categoryIndex the index of the selected category
-     * @param errorMessage  a reference to store the error message if the selection is invalid
-     * @return true if the selection is valid, false otherwise
-     */
-    public boolean selectProductCategory(int categoryIndex, StringBuilder errorMessage) {
-        try {
-            ProductCategory.fromOrdinal(categoryIndex);
-            return true;
-        } catch (IllegalArgumentException e) {
-            errorMessage.append(e.getMessage());
-            return false;
-        }
-    }
-
 
     /**
      * @return how many Sellers there are.
@@ -294,4 +278,114 @@ public class Manager {
         return buyers.size();
     }
 
+
+
+    /**
+     * create a test system for functionality for course 10119
+     */
+    public void createTestSystem() {
+        ArrayList<Buyer> newBuyers = BuyerFactory.createListBuyer();
+        getBuyers().addAll(newBuyers);
+        messageDoneToGenerate(newBuyers, "Buyers");
+        ArrayList<Seller> newSellers = SellerFactory.createListSeller();
+        this.getSellers().addAll(newSellers);
+        messageDoneToGenerate(newSellers, "Sellers");
+    }
+
+    /**
+     * prints the message of successful generation
+     */
+    private static void messageDoneToGenerate(ArrayList<? extends User> newUsers, String pluralEntityType){
+        System.out.println("Automatic generation of " + pluralEntityType + " successful");
+        newUsers.forEach(user -> System.out.println("Added user: " + user.getUsername()));
+    }
+
+    /**
+     * Allows a seller to add a new product to their list.
+     */
+    public void addItemToSeller() {
+        Seller seller = UserInput.selectSeller(this);
+        if (seller == null) {
+            return;
+        }
+
+        Product product = ProductFactory.createProduct();
+        seller.addProduct(product);
+        System.out.println("Product added successfully.");
+    }
+
+    /**
+     * Allows a buyer to add a product to their shopping cart from a seller's list.
+     */
+    public void addItemToBuyerCart() {
+        Buyer buyer = UserInput.selectBuyer(this);
+        if (buyer == null) {
+            return;
+        }
+
+        Seller seller = UserInput.selectSeller(this);
+        if (seller == null) {
+            return;
+        }
+
+        Product product = UserInput.selectProduct(seller);
+        if (product == null) {
+            return;
+        }
+
+        buyer.addToCart(product);
+        System.out.println("Product added to cart successfully.");
+    }
+
+    /**
+     * Finalizes the payment for a buyer's order and clears their cart.
+     */
+    public void payForOrder() {
+        Buyer buyer = UserInput.selectBuyer(this);
+        if (buyer == null) {
+            return;
+        }
+
+        String result = this.processPayment(buyer);
+        System.out.println(result);
+    }
+
+    /**
+     *  Displays all buyers' details
+     * */
+    public void displayAllBuyerDetails()
+    {
+        SystemOutput.displayAllBuyerDetails(this);
+    }
+
+    /**
+     *  Displays all buyers' details
+     * */
+    public void displayAllSellerDetails()
+    {
+        SystemOutput.displayAllSellerDetails(this);
+    }
+    /**
+     *  Displays all products by categories.
+     * */
+    public void displayProductsByCategory() {
+        SystemOutput.displayProductsByCategory(this);
+    }
+
+    /**
+     * Generates a new shopping cart from history for a certain buyer.
+     * */
+    public void generateNewShoppingCartFromHistory() {
+        Buyer buyer = UserInput.selectBuyer(this);
+        if (!UserInput.decideRestoreHistoryCart(this, buyer)) {
+            return;
+        }
+
+        SystemOutput.displayHistoryPurchase(this, buyer);
+
+        int choice = UserInput.getValidIntegerInput("Enter your choice: ") - 1;
+
+        String result = this.generateNewShoppingCartFromHistory(buyer, choice);
+        System.out.println(result);
+    }
 }

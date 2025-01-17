@@ -1,12 +1,13 @@
 package factories;
 
+import features.UserInput;
 import main.Product;
 import main.Seller;
-import java.util.*;
-
-
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
+ * Class is responsible for creating sellers.
  * Class that creates a digital store system with test values
  * <p>
  * follows section 12.
@@ -29,5 +30,22 @@ public class SellerFactory {
             list.add(seller);
         }
         return list;
+    }
+    /**
+     * Creates a new seller after prompting for username, password, and .
+     */
+    public static Seller createSeller() {
+        /*String username = getUniqueUsername("Seller");
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();*/
+
+        /*if (manager.addSeller(seller)) {
+            System.out.println("Seller added successfully.");
+        } else {
+            System.out.println("Error adding seller. Please try again.");
+        }*/
+
+        return new Seller(UserInput.getUsername("Seller"),
+                UserInput.getPassword());
     }
 }

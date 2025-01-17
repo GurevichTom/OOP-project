@@ -1,4 +1,4 @@
-package assignments;
+package features;
 
 import main.User;
 
@@ -62,9 +62,10 @@ public class UserNameFeatures {
     /**
      * Menu option #101
      * prints the number of occurrences of a given name in a User List
-     * @param name the name to count the occurrences of
      */
-    public void printNumOfNameOccurrences(String name) {
+    public void printNumOfNameOccurrences() {
+        String name = UserInput.getValidNonNumericStringInput("Please enter the name of the seller:");
+
         if (checkListEmpty()) {
             return;
         }
@@ -154,4 +155,7 @@ public class UserNameFeatures {
         }
     }
 
+    public String getEntityTypePluralForm() {
+        return entityTypePluralForm;
+    }
 }

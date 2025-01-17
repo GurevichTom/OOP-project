@@ -1,5 +1,6 @@
 package factories;
 
+import features.UserInput;
 import main.Address;
 
 import java.util.ArrayList;
@@ -13,5 +14,13 @@ public class AddressFactory {
         list.add(new Address("Ber", 18, "Munich", "Germany"));
         list.add(new Address("Blue Tooth", 88, "Oslo", "Norway"));
         return list;
+    }
+
+    public static Address createAddress() {
+
+        return new Address(UserInput.getStreetName(),
+                UserInput.getBuildingNumber(),
+                UserInput.getCityName(),
+                UserInput.getCountryName());
     }
 }

@@ -1,5 +1,6 @@
 package factories;
 
+import features.UserInput;
 import main.Product;
 import main.ProductCategory;
 
@@ -14,5 +15,21 @@ public class ProductFactory {
         list.add(new Product("stapler", 20, ProductCategory.OFFICE, false));
         list.add(new Product("hole puncher", 40, ProductCategory.OFFICE, false));
         return list;
+    }
+
+    public static Product createProduct() {
+        /*Product temp  = new Product(UserInput.getProductName(),
+                UserInput.getPrice(),
+                UserInput.getProductCategory(),
+                UserInput.existsSpecialWrapping());*/
+
+        String productName = UserInput.getProductName();
+        // that's the problem.
+        int productPrice = UserInput.getPrice();
+        ProductCategory productCategory = UserInput.getProductCategory();
+        boolean existsSpecialWrapping = UserInput.existsSpecialWrapping();
+        productPrice = (existsSpecialWrapping) ? productPrice += UserInput.getAdditionalPrice() : productPrice;
+
+        return new Product(productName, productPrice, productCategory, existsSpecialWrapping);
     }
 }
