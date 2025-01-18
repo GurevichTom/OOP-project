@@ -4,7 +4,7 @@ import main.*;
 
 import java.util.ArrayList;
 
-public class SystemOutput {
+public class ManagerSystemOutput {
 
 
     /**
@@ -88,7 +88,7 @@ public class SystemOutput {
     }
 
     public static void displayProductsByCategory(Manager manager) {
-        ProductCategory category = UserInput.selectCategory(manager);
+        ProductCategory category = manager.selectCategory();
         String products = manager.getProductsByCategory(category);
         System.out.println(products);
     }
@@ -156,6 +156,8 @@ public class SystemOutput {
             System.out.println(seller);
         }
     }
+
+
 
     public static void displayHistoryPurchase(Manager manager, Buyer buyer) {
         ArrayList<Order> purchaseHistory = buyer.getPurchaseHistory();

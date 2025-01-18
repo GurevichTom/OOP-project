@@ -3,10 +3,11 @@ package main;
 import factories.BuyerFactory;
 import factories.ProductFactory;
 import factories.SellerFactory;
-import features.SystemOutput;
+import features.ManagerSystemOutput;
 import features.UserInput;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 // TODO : Check if there is no such a user.
 
@@ -118,14 +119,14 @@ public class Manager {
      * Sorts the sellers by the number of products they sell in descending order.
      */
     public void sortSellersByProductCount() {
-        sellers.sort(Seller::compareTo);
+        Collections.sort(sellers);
     }
 
     /**
      * Sorts the buyers by their username in ascending order.
      */
     public void sortBuyersByUsername() {
-        buyers.sort(Buyer::compareTo);
+        Collections.sort(buyers);
     }
 
     /**
@@ -193,15 +194,16 @@ public class Manager {
      *
      * @param entity        the entity to add
      * @param userArrayList the list to which the entity is added
-     * @return true if the entity was added successfully, false if the username already exists
+     * Goes on until success.
      */
-    private <T extends User> boolean addEntity(T entity, ArrayList<T> userArrayList) {
-        if (containsUsernameInArray(entity.getUsername(), userArrayList)) {
-            return false;
+    private <T extends User> void addEntity(T entity, ArrayList<T> userArrayList) {
+        while(true) {
+            if (!containsUsernameInArray(entity.getUsername(), userArrayList)) {
+                break;
+            }
         }
 
         userArrayList.add(entity);
-        return true;
     }
 
     /**
@@ -304,7 +306,7 @@ public class Manager {
      * Allows a seller to add a new product to their list.
      */
     public void addItemToSeller() {
-        Seller seller = UserInput.selectSeller(this);
+        Seller seller = selectSeller();
         if (seller == null) {
             return;
         }
@@ -318,12 +320,12 @@ public class Manager {
      * Allows a buyer to add a product to their shopping cart from a seller's list.
      */
     public void addItemToBuyerCart() {
-        Buyer buyer = UserInput.selectBuyer(this);
+        Buyer buyer = selectBuyer();
         if (buyer == null) {
             return;
         }
 
-        Seller seller = UserInput.selectSeller(this);
+        Seller seller = selectSeller();
         if (seller == null) {
             return;
         }
@@ -341,7 +343,7 @@ public class Manager {
      * Finalizes the payment for a buyer's order and clears their cart.
      */
     public void payForOrder() {
-        Buyer buyer = UserInput.selectBuyer(this);
+        Buyer buyer = selectBuyer();
         if (buyer == null) {
             return;
         }
@@ -355,7 +357,7 @@ public class Manager {
      * */
     public void displayAllBuyerDetails()
     {
-        SystemOutput.displayAllBuyerDetails(this);
+        ManagerSystemOutput.displayAllBuyerDetails(this);
     }
 
     /**
@@ -363,29 +365,118 @@ public class Manager {
      * */
     public void displayAllSellerDetails()
     {
-        SystemOutput.displayAllSellerDetails(this);
+        ManagerSystemOutput.displayAllSellerDetails(this);
     }
     /**
      *  Displays all products by categories.
      * */
     public void displayProductsByCategory() {
-        SystemOutput.displayProductsByCategory(this);
+        ManagerSystemOutput.displayProductsByCategory(this);
     }
 
     /**
      * Generates a new shopping cart from history for a certain buyer.
      * */
     public void generateNewShoppingCartFromHistory() {
-        Buyer buyer = UserInput.selectBuyer(this);
-        if (!UserInput.decideRestoreHistoryCart(this, buyer)) {
+        Buyer buyer = selectBuyer();
+        if (!decideRestoreHistoryCart(buyer)) {
             return;
         }
 
-        SystemOutput.displayHistoryPurchase(this, buyer);
+        ManagerSystemOutput.displayHistoryPurchase(this, buyer);
 
         int choice = UserInput.getValidIntegerInput("Enter your choice: ") - 1;
 
         String result = this.generateNewShoppingCartFromHistory(buyer, choice);
         System.out.println(result);
     }
+    // Helper function : I move that here because handling Sellers/Buyers only in manager.
+    // but input isn't (everything with scanner, remember Aranon)
+    private static boolean decideRestoreHistoryCart(Buyer buyer) {
+        if (buyer == null) {
+            return false;
+        }
+
+        if (buyer.getCartCount() > 0) {
+
+            System.out.print("Your current shopping cart is not empty. Are you sure you want to replace it? (yes/no): ");
+            if (!UserInput.getAnswerBinary()) {
+                return true;
+            }
+
+        }
+        System.out.println("Operation cancelled. Your current shopping cart was not replaced.");
+        return false;
+    }
+
+    /**
+     * Prompts the user to select a seller from the list.
+     *
+     * @return the selected Seller object, or null if no sellers are available
+     */
+    private Seller selectSeller() {
+        if (this.getSellersCount() == 0) {
+            System.out.println("No sellers available.");
+            return null;
+        }
+
+        Seller seller = null;
+        while (seller == null) {
+            ManagerSystemOutput.printAllSellers(this);
+            int sellerIndex = UserInput.getValidIntegerInput("Enter the number of the seller: ") - 1; // Convert to zero-based index
+            seller = this.getSellerByIndex(sellerIndex);
+            if (seller == null) {
+                System.out.println("Invalid selection, please try again.");
+            }
+        }
+        return seller;
+    }
+
+    /**
+     * Prompts the user to select a buyer from the list.
+     *
+     * @return the selected Buyer object, or null if no buyers are available
+     */
+    private Buyer selectBuyer() {
+        if (this.getBuyersCount() == 0) {
+            System.out.println("No buyers available.");
+            return null;
+        }
+
+        Buyer buyer = null;
+        while (buyer == null) {
+            ManagerSystemOutput.printAllBuyers(this);
+            int buyerIndex = UserInput.getValidIntegerInput("Enter the number of the buyer: ") - 1; // Convert to zero-based index
+            buyer = this.getBuyerByIndex(buyerIndex);
+            if (buyer == null) {
+                System.out.println("Invalid selection, please try again.");
+            }
+        }
+        return buyer;
+    }
+
+    /**
+     * Prompts the user to select a product category.
+     *
+     * @return the selected ProductCategory
+     */
+    public ProductCategory selectCategory() {
+        while (true) {
+            System.out.println("Select a category:");
+            for (int i = 0; i < ProductCategory.values().length; i++) {
+                System.out.println(i + " - " + ProductCategory.values()[i].getDisplayName());
+            }
+
+            int categoryIndex = UserInput.getValidIntegerInput("Enter your choice: ");
+            StringBuilder errorMessage = new StringBuilder();
+            boolean isValid = UserInput.selectProductCategory(categoryIndex, errorMessage);
+
+            if (isValid) {
+                return ProductCategory.fromOrdinal(categoryIndex);
+            } else {
+                System.out.println(errorMessage);
+            }
+        }
+    }
+
 }

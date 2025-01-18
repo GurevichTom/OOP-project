@@ -18,7 +18,7 @@ public class MainActionsFacade {
         int choice;
 
         do {
-            choice = SystemOutput.displayMainMenu(this.getAutomatedEntityTypePluralForm(), manager);
+            choice = ManagerSystemOutput.displayMainMenu(this.getAutomatedEntityTypePluralForm(), manager);
             runFunction(choice);
         } while (choice != 0);
 

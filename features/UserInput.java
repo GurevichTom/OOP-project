@@ -34,26 +34,26 @@ public class UserInput {
 
         return scanner.nextLine();
     }
-    /**
-     * Prompts the user to enter a unique username.
-     * Ensures that the username is not already taken by any buyer or seller.
-     * New Update: handling with generation of name.
-     *
-     * @param entityType the type of entity (buyer/seller) for prompting the user.
-     * @return a unique username
-     */
-    public static String getUniqueUsername(String entityType, Manager manager) {
-        System.out.print("Enter " + entityType + " username: ");
-
-        String username = scanner.nextLine();
-
-        while (manager.containsUsername(username)) {
-            System.out.print("Username already taken, please choose a new one: ");
-            username = scanner.nextLine();
-        }
-
-        return username;
-    }
+//    /**
+//     * Prompts the user to enter a unique username.
+//     * Ensures that the username is not already taken by any buyer or seller.
+//     * New Update: handling with generation of name.
+//     *
+//     * @param entityType the type of entity (buyer/seller) for prompting the user.
+//     * @return a unique username
+//     */
+//    public static String getUniqueUsername(String entityType, Manager manager) {
+//        System.out.print("Enter " + entityType + " username: ");
+//
+//        String username = scanner.nextLine();
+//
+//        while (manager.containsUsername(username)) {
+//            System.out.print("Username already taken, please choose a new one: ");
+//            username = scanner.nextLine();
+//        }
+//
+//        return username;
+//    }
 
     /**
      * Prompts the user to enter a valid non-numeric string and handles invalid inputs.
@@ -111,51 +111,6 @@ public class UserInput {
         }
     }
 
-    /**
-     * Prompts the user to select a seller from the list.
-     *
-     * @return the selected Seller object, or null if no sellers are available
-     */
-    public static Seller selectSeller(Manager manager) {
-        if (manager.getSellersCount() == 0) {
-            System.out.println("No sellers available.");
-            return null;
-        }
-
-        Seller seller = null;
-        while (seller == null) {
-            SystemOutput.printAllSellers(manager);
-            int sellerIndex = getValidIntegerInput("Enter the number of the seller: ") - 1; // Convert to zero-based index
-            seller = manager.getSellerByIndex(sellerIndex);
-            if (seller == null) {
-                System.out.println("Invalid selection, please try again.");
-            }
-        }
-        return seller;
-    }
-
-    /**
-     * Prompts the user to select a buyer from the list.
-     *
-     * @return the selected Buyer object, or null if no buyers are available
-     */
-    public static Buyer selectBuyer(Manager manager) {
-        if (manager.getBuyersCount() == 0) {
-            System.out.println("No buyers available.");
-            return null;
-        }
-
-        Buyer buyer = null;
-        while (buyer == null) {
-            SystemOutput.printAllBuyers(manager);
-            int buyerIndex = getValidIntegerInput("Enter the number of the buyer: ") - 1; // Convert to zero-based index
-            buyer = manager.getBuyerByIndex(buyerIndex);
-            if (buyer == null) {
-                System.out.println("Invalid selection, please try again.");
-            }
-        }
-        return buyer;
-    }
 
     /**
      * Prompts the user to select a product from the seller's list.
@@ -174,9 +129,9 @@ public class UserInput {
             }
 
             System.out.println("Available products:");
-            int n = 1;
-            for (Product product1 : products) {
-                System.out.println((n++) + ". " + product1.getName() + " - $" + product1.getPrice());
+            for (int i = 0; i < products.size(); i++) {
+
+                System.out.println((i+1) + ". " + product.getName() + " - $" + products.get(i).getPrice());
             }
 
             int productNumber = getValidIntegerInput("Enter product number to add to cart: ");
@@ -188,30 +143,6 @@ public class UserInput {
             }
         }
         return product;
-    }
-
-    /**
-     * Prompts the user to select a product category.
-     *
-     * @return the selected ProductCategory
-     */
-    public static ProductCategory selectCategory(Manager manager) {
-        while (true) {
-            System.out.println("Select a category:");
-            for (int i = 0; i < ProductCategory.values().length; i++) {
-                System.out.println(i + " - " + ProductCategory.values()[i].getDisplayName());
-            }
-
-            int categoryIndex = getValidIntegerInput("Enter your choice: ");
-            StringBuilder errorMessage = new StringBuilder();
-            boolean isValid = selectProductCategory(categoryIndex, errorMessage);
-
-            if (isValid) {
-                return ProductCategory.fromOrdinal(categoryIndex);
-            } else {
-                System.out.println(errorMessage);
-            }
-        }
     }
 
     /**
@@ -342,22 +273,12 @@ public class UserInput {
         return hasSpecialWrapping;
     }
 
-
-    public static boolean decideRestoreHistoryCart(Manager manager, Buyer buyer) {
-        if (buyer == null) {
-            return false;
-        }
-
-        if (buyer.getCartCount() > 0) {
-
-            System.out.print("Your current shopping cart is not empty. Are you sure you want to replace it? (yes/no): ");
-            String response = scanner.nextLine().trim().toLowerCase();
-            if (!response.equals("yes")) {
-                System.out.println("Operation cancelled. Your current shopping cart was not replaced.");
-            }
-        }
-        return true;
+    public static boolean getAnswerBinary() {
+        String response = scanner.nextLine().trim().toLowerCase();
+        return response.equals("yes");
     }
+
+
 
     public static void end() {
         scanner.close();
