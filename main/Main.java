@@ -30,7 +30,10 @@ public class Main {
 
     public static void main(String[] args) {
 
-        MainActionsFacade mf = new MainActionsFacade("Sellers");
+        MainActionsFacade mf = MainActionsFacade.getInstance();
+
+        mf.setManager();
+        mf.setUf("Sellers");
         mf.run();
     }
 

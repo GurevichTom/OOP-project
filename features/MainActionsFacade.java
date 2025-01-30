@@ -2,16 +2,34 @@ package features;
 
 import main.Manager;
 
+
 public class MainActionsFacade {
+    /**
+     * We decided to use Singleton because We're willing to ensure there is only one of that object.
+     * <p> NO NEED IN ANOTHER OBJECT OF IT!</p>
+     * */
+    private static MainActionsFacade instance;
+    private Manager manager = null;
+    private UserNameFeatures uf;
 
-    private final Manager manager;
-    private final UserNameFeatures uf;
+    private MainActionsFacade() {
 
-    public MainActionsFacade(String pluralEntityTypeToAutomated) {
+    }
+
+    public void setManager() {
         this.manager = new Manager();
+    }
+
+    public void setUf(String pluralEntityTypeToAutomated) {
         this.uf = new UserNameFeatures(manager.getSellers(), pluralEntityTypeToAutomated);
     }
 
+    public static MainActionsFacade getInstance() {
+        if (instance == null) {
+            instance = new MainActionsFacade();
+        }
+        return instance;
+    }
 
 
     public void run() {
