@@ -3,11 +3,9 @@ package main;
 import factories.BuyerFactory;
 import factories.ProductFactory;
 import factories.SellerFactory;
-import features.ManagerSystemOutput;
 import features.UserInput;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
 // TODO : Check if there is no such a user.
 
@@ -15,17 +13,17 @@ import java.util.Collections;
  * The Manager class is responsible for managing the lists of buyers and sellers,
  * including adding new buyers or sellers, checking for existing usernames,
  * retrieving buyers or sellers by index, and printing all buyers or sellers.
- *
+ * <p>
  * This class contains methods for adding entities, checking if usernames exist,
  * retrieving entities by index, and printing entities. It ensures that usernames
  * are unique across both buyers and sellers.
- *
+ * <p>
  * This class is implemented as a singleton to ensure that only one instance
  * of the Manager class exists throughout the application.
  */
 public class Manager {
-    private static ArrayList<Buyer> buyers = new ArrayList<>();
-    private static ArrayList<Seller> sellers = new ArrayList<>(); // for Section 15.
+    private static final ArrayList<Buyer> buyers = new ArrayList<>();
+    private static final ArrayList<Seller> sellers = new ArrayList<>(); // for Section 15.
 
 
     /**
@@ -92,17 +90,19 @@ public class Manager {
     /**
      * Adds a new buyer to the list.
      *
-     * @return true if the buyer was added successfully, false if the username already exists
+     * @return true if the buyer was added successfully, false if the username is already taken
      */
-    public void addBuyer() {
-        addEntity(BuyerFactory.createBuyer(), buyers);
+    public boolean addBuyer() {
+        return addEntity(BuyerFactory.createBuyer(), buyers);
     }
 
     /**
      * Adds a new seller to the list.
+     *
+     * @return true if the seller was added successfully, false if the username is already taken
      */
-    public void addSeller() {
-        addEntity(SellerFactory.createSeller(), sellers);
+    public boolean addSeller() {
+        return addEntity(SellerFactory.createSeller(), sellers);
     }
 
     /**
@@ -112,7 +112,7 @@ public class Manager {
      * @return true if the username exists, false otherwise
      */
     public boolean containsUsername(String username) {
-        return containsUsernameInArray(username, buyers) || containsUsernameInArray(username, sellers);
+        return containsUsernameInList(username, buyers) || containsUsernameInList(username, sellers);
     }
 
     /**
@@ -170,40 +170,36 @@ public class Manager {
         return getAllUsernames(sellers);
     }
 
-    /**
-     * Gets the list of buyers.
-     *
-     * @return a list of Buyer objects
-     */
     public ArrayList<Buyer> getBuyers() {
         return buyers;
     }
 
-    /**
-     * Gets the list of sellers.
-     *
-     * @return a list of Seller objects
-     */
     public ArrayList<Seller> getSellers() {
         return sellers;
     }
 
+    public boolean hasBuyers() {
+        return !buyers.isEmpty();
+    }
+
+    public boolean hasSellers() {
+        return !sellers.isEmpty();
+    }
 
     /**
      * Adds a new entity (buyer or seller) to the specified list.
      *
      * @param entity        the entity to add
      * @param userArrayList the list to which the entity is added
-     * Goes on until success.
+     * @return false if entity username is already taken. otherwise, true if successfully added to userArrayList
      */
-    private <T extends User> void addEntity(T entity, ArrayList<T> userArrayList) {
-        while(true) {
-            if (!containsUsernameInArray(entity.getUsername(), userArrayList)) {
-                break;
-            }
+    private <T extends User> boolean addEntity(T entity, ArrayList<T> userArrayList) {
+        if (containsUsername(entity.getUsername())) {
+            return false;
         }
 
         userArrayList.add(entity);
+        return true;
     }
 
     /**
@@ -213,13 +209,14 @@ public class Manager {
      * @param userArrayList the list to search
      * @return true if the username exists in the array, false otherwise
      */
-    private static boolean containsUsernameInArray(String username, ArrayList<? extends User> userArrayList) {
-        for (User user : userArrayList) {
-            if (user.getUsername().equals(username)) {
-                return true;
-            }
-        }
-        return false;
+    private static boolean containsUsernameInList(String username, List<? extends User> userArrayList) {
+//        for (User user : userArrayList) {
+//            if (user.getUsername().equals(username)) {
+//                return true;
+//            }
+//        }
+//        return false;
+        return userArrayList.stream().anyMatch(user -> user.getUsername().equals(username));
     }
 
     /**
@@ -251,7 +248,7 @@ public class Manager {
             ArrayList<Product> products = seller.getProducts();
             for (Product product : products) {
                 if (product.getCategory() == category) {
-                    productDetails.append(product.toString()).append("\n");
+                    productDetails.append(product).append("\n");
                     found = true;
                 }
             }
@@ -287,10 +284,10 @@ public class Manager {
      */
     public void createTestSystem() {
         ArrayList<Buyer> newBuyers = BuyerFactory.createListBuyer();
-        getBuyers().addAll(newBuyers);
+        buyers.addAll(newBuyers);
         messageDoneToGenerate(newBuyers, "Buyers");
         ArrayList<Seller> newSellers = SellerFactory.createListSeller();
-        this.getSellers().addAll(newSellers);
+        sellers.addAll(newSellers);
         messageDoneToGenerate(newSellers, "Sellers");
     }
 
@@ -357,7 +354,8 @@ public class Manager {
      * */
     public void displayAllBuyerDetails()
     {
-        ManagerSystemOutput.displayAllBuyerDetails(this);
+        sortBuyersByUsername();
+        ManagerSystemOutput.displayAllUserDetails(buyers, "buyers");
     }
 
     /**
@@ -365,13 +363,16 @@ public class Manager {
      * */
     public void displayAllSellerDetails()
     {
-        ManagerSystemOutput.displayAllSellerDetails(this);
+        sortSellersByProductCount();
+        ManagerSystemOutput.displayAllUserDetails(sellers, "sellers");
     }
     /**
      *  Displays all products by categories.
      * */
     public void displayProductsByCategory() {
-        ManagerSystemOutput.displayProductsByCategory(this);
+        ProductCategory category = selectCategory();
+        String products = getProductsByCategory(category);
+        System.out.println(products);
     }
 
     /**
@@ -383,7 +384,7 @@ public class Manager {
             return;
         }
 
-        ManagerSystemOutput.displayHistoryPurchase(this, buyer);
+        ManagerSystemOutput.displayHistoryPurchase(buyer);
 
         int choice = UserInput.getValidIntegerInput("Enter your choice: ") - 1;
 
@@ -391,7 +392,7 @@ public class Manager {
         System.out.println(result);
     }
     // Helper function : I move that here because handling Sellers/Buyers only in manager.
-    // but input isn't (everything with scanner, remember Aranon)
+    // but input isn't (everything with scanner, remember Arnon)
     private static boolean decideRestoreHistoryCart(Buyer buyer) {
         if (buyer == null) {
             return false;
@@ -422,7 +423,7 @@ public class Manager {
 
         Seller seller = null;
         while (seller == null) {
-            ManagerSystemOutput.printAllSellers(this);
+            ManagerSystemOutput.printAllUsers(getAllSellers(), "seller");
             int sellerIndex = UserInput.getValidIntegerInput("Enter the number of the seller: ") - 1; // Convert to zero-based index
             seller = this.getSellerByIndex(sellerIndex);
             if (seller == null) {
@@ -445,7 +446,7 @@ public class Manager {
 
         Buyer buyer = null;
         while (buyer == null) {
-            ManagerSystemOutput.printAllBuyers(this);
+            ManagerSystemOutput.printAllUsers(getAllBuyers(), "buyers");
             int buyerIndex = UserInput.getValidIntegerInput("Enter the number of the buyer: ") - 1; // Convert to zero-based index
             buyer = this.getBuyerByIndex(buyerIndex);
             if (buyer == null) {

@@ -28,7 +28,7 @@ public class ProductFactory {
         int productPrice = UserInput.getPrice();
         ProductCategory productCategory = UserInput.getProductCategory();
         boolean existsSpecialWrapping = UserInput.existsSpecialWrapping();
-        productPrice = (existsSpecialWrapping) ? productPrice += UserInput.getAdditionalPrice() : productPrice;
+        productPrice = (existsSpecialWrapping) ? productPrice + UserInput.getAdditionalPrice() : productPrice;
 
         return new Product(productName, productPrice, productCategory, existsSpecialWrapping);
     }

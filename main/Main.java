@@ -16,7 +16,7 @@
 package main;
 
 
-import features.MainActionsFacade;
+import features.StoreFacade;
 
 public class Main {
     /**
@@ -29,12 +29,7 @@ public class Main {
      */
 
     public static void main(String[] args) {
-
-        MainActionsFacade mf = MainActionsFacade.getInstance();
-
-        mf.setManager();
-        mf.setUf("Sellers");
-        mf.run();
+        StoreFacade.getInstance().run();
     }
 
 }

@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * password, and a list of products they are selling.
  */
 public class Seller extends User implements Comparable<Seller> {
-    private ArrayList<Product> products;
+    private final ArrayList<Product> products;
 
     /**
      * Constructs a new Seller with the specified username and password.

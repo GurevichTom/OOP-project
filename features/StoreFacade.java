@@ -1,32 +1,26 @@
 package features;
 
 import main.Manager;
+import main.ManagerSystemOutput;
 
 
-public class MainActionsFacade {
+public class StoreFacade {
     /**
      * We decided to use Singleton because We're willing to ensure there is only one of that object.
      * <p> NO NEED IN ANOTHER OBJECT OF IT!</p>
      * */
-    private static MainActionsFacade instance;
-    private Manager manager = null;
-    private UserNameFeatures uf;
+    private static StoreFacade instance;
+    private final Manager manager;
+    private final UserNameFeatures uf;
 
-    private MainActionsFacade() {
-
+    private StoreFacade() {
+        manager = new Manager();
+        uf = new UserNameFeatures(manager.getSellers(), "Sellers");
     }
 
-    public void setManager() {
-        this.manager = new Manager();
-    }
-
-    public void setUf(String pluralEntityTypeToAutomated) {
-        this.uf = new UserNameFeatures(manager.getSellers(), pluralEntityTypeToAutomated);
-    }
-
-    public static MainActionsFacade getInstance() {
+    public static StoreFacade getInstance() {
         if (instance == null) {
-            instance = new MainActionsFacade();
+            instance = new StoreFacade();
         }
         return instance;
     }
@@ -36,11 +30,29 @@ public class MainActionsFacade {
         int choice;
 
         do {
-            choice = ManagerSystemOutput.displayMainMenu(this.getAutomatedEntityTypePluralForm(), manager);
+            choice = ManagerSystemOutput.displayMainMenu(this.getAutomatedEntityTypePluralForm(), manager.hasBuyers(), manager.hasSellers());
             runFunction(choice);
         } while (choice != 0);
 
         UserInput.end();
+    }
+
+    private void addUser(String userType) {
+        boolean added = false;
+
+        while (!added) {
+            added = switch (userType) {
+                case "seller" -> manager.addSeller();
+                case "buyer" -> manager.addBuyer();
+                default -> throw new IllegalArgumentException("Unknown user type: " + userType);
+            };
+
+            if (!added) {
+                System.out.println("Error adding a new " + userType + ". Username is already taken\nTry again");
+            }
+        }
+
+        System.out.println(userType + " successfully added!");
     }
 
 
@@ -49,13 +61,13 @@ public class MainActionsFacade {
      *
      * @param choice the user's choice from the main menu
      */
-    public void runFunction(int choice) {
+    private void runFunction(int choice) {
 
 
         switch (choice) {
             case 0 -> System.out.println("Exiting the menu.");
-            case 1 -> manager.addSeller();
-            case 2 -> manager.addBuyer();
+            case 1 -> addUser("seller");
+            case 2 -> addUser("buyer");
             case 3 -> manager.addItemToSeller();
             case 4 -> manager.addItemToBuyerCart();
             case 5 -> manager.payForOrder();

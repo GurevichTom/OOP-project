@@ -25,13 +25,16 @@ public class UserInput {
      */
     public static String getUsername(String entityType) {
         System.out.print("Enter " + entityType + " username: ");
+        String username;
 
+        do {
+          username = scanner.nextLine();
+        } while (username.isEmpty());
 
-        /*while (Manager.containsUsername(username)) {
-            System.out.print("Username already taken, please choose a new one: ");
-            username = scanner.nextLine();
-        }*/
+        return username;
+    }
 
+    public static String getStringInput() {
         return scanner.nextLine();
     }
 //    /**
@@ -260,17 +263,7 @@ public class UserInput {
      */
     public static boolean existsSpecialWrapping() {
         System.out.print("Does the product have special wrapping? (yes/no): ");
-        String wrappingResponse = scanner.nextLine().trim().toLowerCase();
-
-        boolean hasSpecialWrapping = wrappingResponse.equals("yes");
-
-        /*if (hasSpecialWrapping) {
-            String prompt = "Please enter the additional cost for special wrapping: ";
-            int additionalPrice = getValidIntegerInput(prompt);
-
-        }*/
-
-        return hasSpecialWrapping;
+        return getAnswerBinary();
     }
 
     public static boolean getAnswerBinary() {

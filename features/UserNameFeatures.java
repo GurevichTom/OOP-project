@@ -3,21 +3,18 @@ package features;
 import main.User;
 
 /* All exact needed imports. */
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.ArrayList;
-import java.util.ListIterator;
-import java.util.TreeSet;
+import java.util.*;
 
 public class UserNameFeatures {
     private final String entityTypePluralForm;
     private final List<? extends User> list;
 
+    private final ArrayList<String> namesList;
+
     public UserNameFeatures(List<? extends User> list, String entityTypePluralForm) {
         this.entityTypePluralForm = entityTypePluralForm;
         this.list = list;
+        namesList = new ArrayList<>();
     }
 
 
@@ -86,10 +83,9 @@ public class UserNameFeatures {
             return;
 
         Map<String, Integer> namesMap = countDuplicatesUsernames();
-        ArrayList<String> namesList = new ArrayList<>();
 
         ListIterator<String> it = namesList.listIterator();
-        namesMap.forEach((name, value) -> {
+        namesMap.forEach((name, _) -> {
             it.add(name);
             it.add(name);
         });
@@ -97,6 +93,35 @@ public class UserNameFeatures {
         while (it.hasPrevious()) {
             System.out.println(it.previous());
         }
+
+        System.out.println("Do you want to see the output of my self-implemented iterators (Y/y or any other key to skip):");
+        String ans = UserInput.getStringInput();
+        if (ans.equalsIgnoreCase("y")) {
+            demoCustomIterator();
+        }
+        namesList.clear();
+    }
+
+    private void demoCustomIterator(){
+        System.out.println("1) Custom iterator forward");
+        MyIterator it = new MyIterator();
+        it.attach(new Action1());
+        it.attach(new Action2());
+
+        while (it.hasNext())
+            System.out.println(it.next());
+
+        System.out.println("2) Custom list iterator forward");
+        MyListIterator listIt = new MyListIterator();
+        listIt.attach(new Action1());
+        listIt.attach(new Action2());
+
+        while (listIt.hasNext())
+            System.out.println(listIt.next());
+
+        System.out.println("3) Custom list iterator backwards");
+        while (listIt.hasPrevious())
+            System.out.println(listIt.previous());
     }
 
     /**
@@ -157,5 +182,88 @@ public class UserNameFeatures {
 
     public String getEntityTypePluralForm() {
         return entityTypePluralForm;
+    }
+
+
+    private class MyIterator implements Iterator<String> {
+        private final Set<IteratorObserver> observers = new HashSet<>();
+        int cur = 0;
+
+        @Override
+        public boolean hasNext() {
+            return cur < namesList.size();
+        }
+
+        @Override
+        public String next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            String ret = namesList.get(cur++);
+
+            if (!hasNext())
+                update();
+
+            return ret;
+        }
+
+        public void attach(IteratorObserver observer) {
+            observers.add(observer);
+        }
+
+        public void detach(IteratorObserver observer) {
+            observers.remove(observer);
+        }
+
+        public void update() {
+            observers.forEach(o -> o.onIterationEnd("My " + getClass().getSimpleName() + " ended!"));
+        }
+    }
+
+    private class MyListIterator extends MyIterator implements ListIterator<String> {
+
+        @Override
+        public boolean hasPrevious() {
+            return cur > 0;
+        }
+
+        @Override
+        public String previous() {
+            if (!hasPrevious()) {
+                throw new NoSuchElementException();
+            }
+
+            String ret = namesList.get(--cur);
+
+            if (!hasPrevious())
+                update();
+
+            return ret;
+        }
+
+        @Override
+        public int nextIndex() {
+            return cur;
+        }
+
+        @Override
+        public int previousIndex() {
+            return cur - 1;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void set(String s) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void add(String s) {
+            throw new UnsupportedOperationException();
+        }
     }
 }
