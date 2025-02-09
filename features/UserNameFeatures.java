@@ -9,7 +9,7 @@ public class UserNameFeatures {
     private final String entityTypePluralForm;
     private final List<? extends User> list;
 
-    private final ArrayList<String> namesList;
+    private ArrayList<String> namesList;
 
     public UserNameFeatures(List<? extends User> list, String entityTypePluralForm) {
         this.entityTypePluralForm = entityTypePluralForm;
@@ -82,16 +82,18 @@ public class UserNameFeatures {
         if (checkListEmpty())
             return;
 
+        namesList = new ArrayList<>();
         Map<String, Integer> namesMap = countDuplicatesUsernames();
 
-        ListIterator<String> it = namesList.listIterator();
+//        ListIterator<String> it = namesList.listIterator();
+        IteratorAdapter<String> it = new IteratorAdapter<>(namesList.listIterator());
         namesMap.forEach((name, _) -> {
-            it.add(name);
-            it.add(name);
+            it.myAdd(name);
+            it.myAdd(name);
         });
 
-        while (it.hasPrevious()) {
-            System.out.println(it.previous());
+        while (it.myHasPrevious()) {
+            System.out.println(it.myPrevious());
         }
 
         System.out.println("Do you want to see the output of my self-implemented iterators (Y/y or any other key to skip):");
@@ -99,7 +101,7 @@ public class UserNameFeatures {
         if (ans.equalsIgnoreCase("y")) {
             demoCustomIterator();
         }
-        namesList.clear();
+//        namesList.clear();
     }
 
     private void demoCustomIterator(){
@@ -265,5 +267,29 @@ public class UserNameFeatures {
         public void add(String s) {
             throw new UnsupportedOperationException();
         }
+    }
+
+
+    /**
+     * Option 104
+     * Memento design pattern
+     */
+    public static class Memento {
+        private final ArrayList<String> namesList;
+        private Memento(ArrayList<String> namesList) {
+            this.namesList = new ArrayList<>(namesList);
+        }
+    }
+
+    public Memento createMemento() {
+        return new Memento(namesList);
+    }
+
+    /**
+     * Option 105
+     * @param m the memento
+     */
+    public void setMemento(Memento m) {
+        namesList = new ArrayList<>(m.namesList);
     }
 }

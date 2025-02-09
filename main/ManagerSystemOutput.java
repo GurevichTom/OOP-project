@@ -68,6 +68,8 @@ public class ManagerSystemOutput {
         System.out.println("101 - Check how many " + pluralEntityType + " have a specific username");
         System.out.println("102 - Duplicate and reverse the names of all " + pluralEntityType + ", then display them.");
         System.out.println("103 - Sort names of all " + pluralEntityType + " without duplicates by string length and display them.");
+        System.out.println("104 - Save ArrayList");
+        System.out.println("105 - Restore ArrayList");
 
         return UserInput.getValidIntegerInput("Enter your choice: ");
     }

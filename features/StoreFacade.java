@@ -3,6 +3,10 @@ package features;
 import main.Manager;
 import main.ManagerSystemOutput;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
 
 public class StoreFacade {
     /**
@@ -12,10 +16,17 @@ public class StoreFacade {
     private static StoreFacade instance;
     private final Manager manager;
     private final UserNameFeatures uf;
+    private final Map<Integer, Command> commands = new HashMap<>();
+    private final Stack<UserNameFeatures.Memento> stack = new Stack<>();
 
     private StoreFacade() {
         manager = new Manager();
         uf = new UserNameFeatures(manager.getSellers(), "Sellers");
+        commands.put(99, new PrintNamesCommand(uf));
+        commands.put(100, new PrintNamesCountedDuplicatesCommand(uf));
+        commands.put(101, new PrintNumOfNameOccurrencesCommand(uf));
+        commands.put(102, new PrintUniqueUsernamesTwiceBackwardsCommand(uf));
+        commands.put(103, new SortByUsernameAndDisplayCommand(uf));
     }
 
     public static StoreFacade getInstance() {
@@ -31,7 +42,7 @@ public class StoreFacade {
 
         do {
             choice = ManagerSystemOutput.displayMainMenu(this.getAutomatedEntityTypePluralForm(), manager.hasBuyers(), manager.hasSellers());
-            runFunction(choice);
+            runMenuOption(choice);
         } while (choice != 0);
 
         UserInput.end();
@@ -61,7 +72,7 @@ public class StoreFacade {
      *
      * @param choice the user's choice from the main menu
      */
-    private void runFunction(int choice) {
+    private void runMenuOption(int choice) {
 
 
         switch (choice) {
@@ -76,14 +87,34 @@ public class StoreFacade {
             case 8 -> manager.displayProductsByCategory();
             case 9 -> manager.generateNewShoppingCartFromHistory();
             // Course 10119:
-            case 99 -> uf.printNames();
-            case 100 -> uf.printNamesCountedDuplicates();
-            case 101 -> uf.printNumOfNameOccurrences();
-            case 102 -> uf.printUniqueUsernamesTwiceBackwards();
-            case 103 -> uf.sortByUsernameAndDisplay();
+            case 104 -> {
+                stack.add(uf.createMemento());
+                System.out.println("Arraylist saved");
+            }
+            case 105 -> {
+                if (stack.isEmpty()) {
+                    System.out.println("No saves yet, cannot restore");
+                    return;
+                }
+                uf.setMemento(stack.pop());
+                System.out.println("Arraylist restored from the last save");
+            }
+//            case 99 -> uf.printNames();
+//            case 100 -> uf.printNamesCountedDuplicates();
+//            case 101 -> uf.printNumOfNameOccurrences();
+//            case 102 -> uf.printUniqueUsernamesTwiceBackwards();
+//            case 103 -> uf.sortByUsernameAndDisplay();
             case -1 -> manager.createTestSystem();
-            default -> System.out.println("Invalid choice. Please try again.");
+            default ->{
+                Command command = commands.get(choice);
+                if (command != null) {
+                    command.execute();
+                } else {
+                    System.out.println("Invalid choice. Please try again.");
+                }
+            }
         }
+
     }
 
     private String getAutomatedEntityTypePluralForm () {
